@@ -1,0 +1,5 @@
+ALTER TABLE users 
+ALTER COLUMN latitude TYPE TEXT USING latitude::TEXT;
+
+ALTER TABLE users 
+ALTER COLUMN longitude TYPE TEXT USING longitude::TEXT;

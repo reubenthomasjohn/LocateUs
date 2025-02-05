@@ -6,6 +6,12 @@ type Config struct {
 	AccountSid string `mapstructure:"TWILIO_ACCOUNT_SID"`
 	AuthToken string `mapstructure:"TWILIO_AUTH_TOKEN"`
 	SenderNumber string `mapstructure:"SENDER_NUMBER"`
+	DBDriver string `mapstructure:"DB_DRIVER"`
+	DBSource string `mapstructure:"DB_SOURCE"`
+	ServerAddress string `mapstructure:"SERVER_ADDRESS"`
+	NgrokUrl string `mapstructure:"NGROK_URL"`
+	DomainName string `mapstructure:"DOMAIN_NAME"`
+	PrefixUrl	string
 }
 
 func LoadConfig(path string) (config Config, err error) {
@@ -21,5 +27,11 @@ func LoadConfig(path string) (config Config, err error) {
 	}
 
 	err = viper.Unmarshal(&config)
+
+	if config.DomainName != "" {
+		config.PrefixUrl = config.DomainName
+	} else if config.NgrokUrl != "" {
+		config.PrefixUrl = config.NgrokUrl
+	}
 	return
 }

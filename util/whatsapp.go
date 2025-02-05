@@ -9,7 +9,7 @@ import (
 	api "github.com/twilio/twilio-go/rest/api/v2010"
 )
 
-func TwilioSendMsg(toNumber string, msgBody string) (response string, err error) {
+func TwilioSendMsg(toNumber, msgBody, callbackEndpoint string) (response string, err error) {
 
 	config, err := LoadConfig(".")
 	if err != nil {
@@ -25,7 +25,8 @@ func TwilioSendMsg(toNumber string, msgBody string) (response string, err error)
 	params.SetTo(toNumber)
 	params.SetFrom(fmt.Sprintf("whatsapp:%s", config.SenderNumber))
 	params.SetBody(msgBody)
-	// params.SetStatusCallback("https://8ce9-2401-4900-1c43-f672-4517-c91c-90d3-d4eb.ngrok-free.app/twilio-status")
+	params.SetMediaUrl([]string{"https://media.christcommunitychurch.in/sites/2/2017/06/2017-logo-2.png"})
+	params.SetStatusCallback(fmt.Sprintf("%s/%s", config.PrefixUrl, callbackEndpoint))
 
 
 	resp, err := client.Api.CreateMessage(params)
