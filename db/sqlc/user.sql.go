@@ -15,9 +15,10 @@ INSERT INTO users (
   full_name,
   latitude,
   longitude,
-  phone_number
+  phone_number,
+  status
 ) VALUES (
-    $1, $2, $3, $4
+    $1, $2, $3, $4, $5
 ) RETURNING id, full_name, phone_number, latitude, longitude, address, is_family, created_at, status
 `
 
@@ -26,6 +27,7 @@ type CreateUserParams struct {
 	Latitude    float64        `json:"latitude"`
 	Longitude   float64        `json:"longitude"`
 	PhoneNumber sql.NullString `json:"phone_number"`
+	Status      NullUserStatus `json:"status"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -34,6 +36,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.Latitude,
 		arg.Longitude,
 		arg.PhoneNumber,
+		arg.Status,
 	)
 	var i User
 	err := row.Scan(
@@ -144,7 +147,7 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 
 const updateUser = `-- name: UpdateUser :one
 UPDATE users 
-    SET latitude = $2, longitude = $3, full_name = $4
+    SET latitude = $2, longitude = $3, full_name = $4, status = $5
 WHERE id = $1
 RETURNING id, full_name, phone_number, latitude, longitude, address, is_family, created_at, status
 `
@@ -154,6 +157,7 @@ type UpdateUserParams struct {
 	Latitude  float64        `json:"latitude"`
 	Longitude float64        `json:"longitude"`
 	FullName  sql.NullString `json:"full_name"`
+	Status    NullUserStatus `json:"status"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
@@ -162,7 +166,38 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		arg.Latitude,
 		arg.Longitude,
 		arg.FullName,
+		arg.Status,
 	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.FullName,
+		&i.PhoneNumber,
+		&i.Latitude,
+		&i.Longitude,
+		&i.Address,
+		&i.IsFamily,
+		&i.CreatedAt,
+		&i.Status,
+	)
+	return i, err
+}
+
+const updateUserName = `-- name: UpdateUserName :one
+UPDATE users 
+    SET full_name = $2, status = $3
+WHERE id = $1
+RETURNING id, full_name, phone_number, latitude, longitude, address, is_family, created_at, status
+`
+
+type UpdateUserNameParams struct {
+	ID       int64          `json:"id"`
+	FullName sql.NullString `json:"full_name"`
+	Status   NullUserStatus `json:"status"`
+}
+
+func (q *Queries) UpdateUserName(ctx context.Context, arg UpdateUserNameParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updateUserName, arg.ID, arg.FullName, arg.Status)
 	var i User
 	err := row.Scan(
 		&i.ID,

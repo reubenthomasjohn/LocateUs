@@ -16,6 +16,7 @@ type Querier interface {
 	GetUserByNumber(ctx context.Context, phoneNumber sql.NullString) (User, error)
 	ListUsers(ctx context.Context) ([]User, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
+	UpdateUserName(ctx context.Context, arg UpdateUserNameParams) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)

@@ -3,9 +3,10 @@ INSERT INTO users (
   full_name,
   latitude,
   longitude,
-  phone_number
+  phone_number,
+  status
 ) VALUES (
-    $1, $2, $3, $4
+    $1, $2, $3, $4, $5
 ) RETURNING *;
 
 -- name: ListUsers :many
@@ -18,7 +19,13 @@ WHERE id = $1 LIMIT 1;
 
 -- name: UpdateUser :one
 UPDATE users 
-    SET latitude = $2, longitude = $3, full_name = $4
+    SET latitude = $2, longitude = $3, full_name = $4, status = $5
+WHERE id = $1
+RETURNING *;
+
+-- name: UpdateUserName :one
+UPDATE users 
+    SET full_name = $2, status = $3
 WHERE id = $1
 RETURNING *;
 
