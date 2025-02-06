@@ -1,9 +1,6 @@
 ngrok:
 	ngrok http http://localhost:8080
 
-serverup:
-	ngrok http http://localhost:8080 && go run main.go
-
 postgres:
 	docker run --name heatmap_db -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=secret -d postgres:17.2-alpine
 
@@ -22,4 +19,10 @@ migratedown:
 sqlc:
 	sqlc generate
 
-.PHONY: ngrok serverup postgres postgres-down createdb migrateup sqlc
+build:
+	docker build --tag heatmap-api .
+
+composeup:
+	docker compose up
+
+.PHONY: ngrok postgres postgres-down createdb migrateup sqlc build composeup

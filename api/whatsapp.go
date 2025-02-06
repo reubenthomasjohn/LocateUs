@@ -126,7 +126,7 @@ func (server *Server) TwilioReceiveMsg(ctx *gin.Context) {
 	}
 
 	msgBody := ""
-	switch os := Status; os {
+	switch s := Status; s {
 	case "ADD_NAME":
 		msgBody = util.MessageResponsesInstance.ProcessComplete
 	case "ADD_LOCATION":
@@ -150,7 +150,7 @@ func (server *Server) GetUsers(ctx *gin.Context) {
 		return
 	}
 
-	// Convert DB users to API response format
+	// Convert DB users to the API response format that a frontend can work with.
 	var responseUsers []UserResponse
 	for _, user := range users {
 		responseUsers = append(responseUsers, newUserResponse(user))

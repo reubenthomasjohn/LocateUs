@@ -1,0 +1,30 @@
+services:
+  api:
+    build: .
+    container_name: heatmap_api
+    ports:
+      - "8080:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: [./heatmap-api]
+
+  db:
+    image: postgres:17.2-alpine
+    container_name: heatmap_db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: example
+      POSTGRES_USER: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
