@@ -25,4 +25,7 @@ build:
 composeup:
 	docker compose up
 
+run:
+	docker container rm heatmap-api && docker run --name heatmap-api -d -p 8080:8080 heatmap-api 
+
 .PHONY: ngrok postgres postgres-down createdb migrateup sqlc build composeup

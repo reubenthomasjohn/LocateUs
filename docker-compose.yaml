@@ -3,7 +3,7 @@ services:
     build: .
     container_name: heatmap_api
     ports:
-      - "8080:8000"
+      - "8080:8080"
     depends_on:
       db:
         condition: service_healthy
@@ -16,8 +16,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_PASSWORD: example
+      POSTGRES_PASSWORD: secret
       POSTGRES_USER: postgres
+      POSTGRES_DB: ccc
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
