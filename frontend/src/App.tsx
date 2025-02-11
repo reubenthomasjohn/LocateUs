@@ -25,7 +25,7 @@ function App() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8080/users")
+      .get("https://api.locatetogether.net/users")
       .then((response) => setUsers(response.data))
       .catch((err) => console.error("User fetch failed:", err));
 

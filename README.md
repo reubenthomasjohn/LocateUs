@@ -20,3 +20,10 @@ TODO:
 
 `sudo snap install docker`
 `sudo snap start docker`
+`sudo apt install make`
+
+```sh
+sudo groupadd docker
+sudo usermod -aG docker $USER
+su -s ${USER}
+```
