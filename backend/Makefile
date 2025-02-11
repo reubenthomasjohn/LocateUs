@@ -2,7 +2,12 @@ ngrok:
 	ngrok http http://localhost:8080
 
 postgres:
-	docker run --name heatmap_db -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=secret -d postgres:17.2-alpine
+	docker run --name heatmap_db -p 5432:5432 \
+		-e POSTGRES_USER=postgres \
+		-e POSTGRES_PASSWORD=secret \
+		-v pgdata:/var/lib/postgresql/data \
+		-d postgres:17.2-alpine
+
 
 postgres-down:
 	docker stop heatmap_db && docker container rm heatmap_db
@@ -23,7 +28,8 @@ build:
 	docker build --tag heatmap-api .
 
 composeup:
-	docker compose up
+	docker rm -f heatmap_api heatmap_db || true
+	docker compose up --builddocke
 
 run:
 	docker container rm heatmap-api && docker run --name heatmap-api -d -p 8080:8080 heatmap-api 

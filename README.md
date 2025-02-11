@@ -15,3 +15,8 @@ TODO:
 1. Create terraform to apply S3 to host S3
 2. Create cloudfront, and route53 to connect alias.
 3. github action to deploy to s3, and invalidate cache when theres a new deployment.
+
+##
+
+`sudo snap install docker`
+`sudo snap start docker`

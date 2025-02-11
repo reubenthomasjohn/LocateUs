@@ -3,11 +3,11 @@ variable "region" {
 }
 
 variable "company_domain_name" {
-  default = "sample.net" // need to buy?
+  default = "locatetogether.net" // bought domain
 }
 
 variable "company_name" {
-  default = "sample" // fill
+  default = "locatetogether" // fill
 }
 
 variable "stage" {
@@ -15,7 +15,7 @@ variable "stage" {
 }
 
 variable "ami" {
-  default = "ami-08c40ec9ead489470"
+  default = "ami-00bb6a80f01f03502"
 }
 
 variable "public_key" {

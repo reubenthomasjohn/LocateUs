@@ -1,5 +1,5 @@
 variable "ami" {
-  default = "ami-08c40ec9ead489470"
+  default = "ami-00bb6a80f01f03502"
 }
 
 variable "public_key" {

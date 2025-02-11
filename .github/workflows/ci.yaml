@@ -33,7 +33,7 @@ jobs:
           go-version: 1.23.1
         id: go
 
-      - name: Check out code into the Go module dir
+      - name: Check out code into the code dir
         uses: actions/checkout@v2
 
       - name: Install golang-migrate
@@ -43,9 +43,14 @@ jobs:
           which migrate
 
       - name: Make migrations
-        run: make migrateup
-
-      - name: Build and run go image
+        run: |
+          cd backend/
+          make migrateup
+  api:
+    name: setup-go-backend
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Build and run go container
         run: make build && make run
         env:
           TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_SID }}
