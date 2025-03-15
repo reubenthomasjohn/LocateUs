@@ -40,6 +40,6 @@ run:
 	docker container rm heatmap-api || true && docker run --name heatmap-api -d -p 8080:8080 heatmap-api 
 
 rebuild_run_api:
-	docker container rm heatmap-api || true && docker image rm heatmap-api && make build && make run
+	docker stop heatmap-api || true && docker container rm heatmap-api || true && docker image rm heatmap-api || true && make build && make run
 
 .PHONY: ngrok postgres postgres-down createdb migrateup sqlc build composeup rebuild_run_api
