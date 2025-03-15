@@ -8,4 +8,5 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o heatmap-api
 FROM scratch
 WORKDIR /root/
 COPY --from=builder /app/heatmap-api .
+COPY --from=builder /app/app.env .
 CMD ["./heatmap-api"]
