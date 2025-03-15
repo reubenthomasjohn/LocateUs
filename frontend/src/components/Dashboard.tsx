@@ -26,7 +26,8 @@ function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const api = "https://api.locatetogether.net/members"; // Replace with your actual API
+        const api = "https://api.locatetogether.net/members"; //"http://localhost:8080/members";
+        // Replace with your actual API
         const token = localStorage.getItem("access_token");
 
         if (!token) {
@@ -68,7 +69,7 @@ function Dashboard() {
     console.log("Edit user:", userId);
   };
 
-  const filteredUsers = users.filter((user) => {
+  const filteredUsers = (users ?? []).filter((user) => {
     const searchLower = searchQuery.toLowerCase();
     return (
       user.full_name.toLowerCase().includes(searchLower) ||

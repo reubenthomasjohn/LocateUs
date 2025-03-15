@@ -115,7 +115,7 @@ export const Analytics = ({ analytics, users }: AnalyticsProps) => {
                     Total Users
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    {users.length}
+                    {users?.length ?? ""}
                   </dd>
                 </dl>
               </div>
@@ -134,7 +134,7 @@ export const Analytics = ({ analytics, users }: AnalyticsProps) => {
                     Total Locations
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    {users.length}
+                    {users?.length ?? ""}
                   </dd>
                 </dl>
               </div>
