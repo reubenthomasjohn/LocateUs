@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS "users";
+
+ALTER TABLE IF EXISTS members
+RENAME TO users;

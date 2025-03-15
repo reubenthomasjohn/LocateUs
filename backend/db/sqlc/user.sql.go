@@ -7,208 +7,60 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
-  full_name,
-  latitude,
-  longitude,
-  phone_number,
-  status
+    username, 
+    hashed_password,
+    full_name,
+    email
 ) VALUES (
-    $1, $2, $3, $4, $5
-) RETURNING id, full_name, phone_number, latitude, longitude, address, is_family, created_at, status
+    $1, $2, $3, $4
+) RETURNING username, hashed_password, full_name, email, password_changed_at, created_at
 `
 
 type CreateUserParams struct {
-	FullName    sql.NullString `json:"full_name"`
-	Latitude    float64        `json:"latitude"`
-	Longitude   float64        `json:"longitude"`
-	PhoneNumber sql.NullString `json:"phone_number"`
-	Status      NullUserStatus `json:"status"`
+	Username       string `json:"username"`
+	HashedPassword string `json:"hashed_password"`
+	FullName       string `json:"full_name"`
+	Email          string `json:"email"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 	row := q.db.QueryRowContext(ctx, createUser,
+		arg.Username,
+		arg.HashedPassword,
 		arg.FullName,
-		arg.Latitude,
-		arg.Longitude,
-		arg.PhoneNumber,
-		arg.Status,
+		arg.Email,
 	)
 	var i User
 	err := row.Scan(
-		&i.ID,
+		&i.Username,
+		&i.HashedPassword,
 		&i.FullName,
-		&i.PhoneNumber,
-		&i.Latitude,
-		&i.Longitude,
-		&i.Address,
-		&i.IsFamily,
+		&i.Email,
+		&i.PasswordChangedAt,
 		&i.CreatedAt,
-		&i.Status,
 	)
 	return i, err
-}
-
-const deleteUser = `-- name: DeleteUser :exec
-DELETE FROM users 
-WHERE id = $1
-`
-
-func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, deleteUser, id)
-	return err
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, full_name, phone_number, latitude, longitude, address, is_family, created_at, status FROM users 
-WHERE id = $1 LIMIT 1
+SELECT username, hashed_password, full_name, email, password_changed_at, created_at FROM users
+WHERE username = $1 LIMIT 1
 `
 
-func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUser, id)
+func (q *Queries) GetUser(ctx context.Context, username string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUser, username)
 	var i User
 	err := row.Scan(
-		&i.ID,
+		&i.Username,
+		&i.HashedPassword,
 		&i.FullName,
-		&i.PhoneNumber,
-		&i.Latitude,
-		&i.Longitude,
-		&i.Address,
-		&i.IsFamily,
+		&i.Email,
+		&i.PasswordChangedAt,
 		&i.CreatedAt,
-		&i.Status,
-	)
-	return i, err
-}
-
-const getUserByNumber = `-- name: GetUserByNumber :one
-SELECT id, full_name, phone_number, latitude, longitude, address, is_family, created_at, status FROM users
-WHERE phone_number = $1 LIMIT 1
-`
-
-func (q *Queries) GetUserByNumber(ctx context.Context, phoneNumber sql.NullString) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByNumber, phoneNumber)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.FullName,
-		&i.PhoneNumber,
-		&i.Latitude,
-		&i.Longitude,
-		&i.Address,
-		&i.IsFamily,
-		&i.CreatedAt,
-		&i.Status,
-	)
-	return i, err
-}
-
-const listUsers = `-- name: ListUsers :many
-SELECT id, full_name, phone_number, latitude, longitude, address, is_family, created_at, status FROM users
-ORDER BY id
-`
-
-func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.db.QueryContext(ctx, listUsers)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []User{}
-	for rows.Next() {
-		var i User
-		if err := rows.Scan(
-			&i.ID,
-			&i.FullName,
-			&i.PhoneNumber,
-			&i.Latitude,
-			&i.Longitude,
-			&i.Address,
-			&i.IsFamily,
-			&i.CreatedAt,
-			&i.Status,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const updateUser = `-- name: UpdateUser :one
-UPDATE users 
-    SET latitude = $2, longitude = $3, full_name = $4, status = $5
-WHERE id = $1
-RETURNING id, full_name, phone_number, latitude, longitude, address, is_family, created_at, status
-`
-
-type UpdateUserParams struct {
-	ID        int64          `json:"id"`
-	Latitude  float64        `json:"latitude"`
-	Longitude float64        `json:"longitude"`
-	FullName  sql.NullString `json:"full_name"`
-	Status    NullUserStatus `json:"status"`
-}
-
-func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, updateUser,
-		arg.ID,
-		arg.Latitude,
-		arg.Longitude,
-		arg.FullName,
-		arg.Status,
-	)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.FullName,
-		&i.PhoneNumber,
-		&i.Latitude,
-		&i.Longitude,
-		&i.Address,
-		&i.IsFamily,
-		&i.CreatedAt,
-		&i.Status,
-	)
-	return i, err
-}
-
-const updateUserName = `-- name: UpdateUserName :one
-UPDATE users 
-    SET full_name = $2, status = $3
-WHERE id = $1
-RETURNING id, full_name, phone_number, latitude, longitude, address, is_family, created_at, status
-`
-
-type UpdateUserNameParams struct {
-	ID       int64          `json:"id"`
-	FullName sql.NullString `json:"full_name"`
-	Status   NullUserStatus `json:"status"`
-}
-
-func (q *Queries) UpdateUserName(ctx context.Context, arg UpdateUserNameParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, updateUserName, arg.ID, arg.FullName, arg.Status)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.FullName,
-		&i.PhoneNumber,
-		&i.Latitude,
-		&i.Longitude,
-		&i.Address,
-		&i.IsFamily,
-		&i.CreatedAt,
-		&i.Status,
 	)
 	return i, err
 }

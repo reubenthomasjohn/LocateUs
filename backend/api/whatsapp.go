@@ -13,7 +13,7 @@ import (
 )
 
 
-type TwilioStatusReq struct {
+type twilioStatusRequest struct {
 	MessageSid string `form:"MessageSid"`
 	AccountSid string `form:"AccountSid"`
 	From string `form:"From"`
@@ -24,8 +24,8 @@ type TwilioStatusReq struct {
 	EventType string `form:"EventType"`
 }
 
-func (server *Server) TwilioStatusMsg(ctx *gin.Context) {
-	var req TwilioStatusReq
+func (server *Server) twilioStatusMsg(ctx *gin.Context) {
+	var req twilioStatusRequest
 
     if err := ctx.ShouldBind(&req); err != nil { 
         ctx.JSON(http.StatusBadRequest, errorResponse(err))
@@ -37,7 +37,7 @@ func (server *Server) TwilioStatusMsg(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, nil)
 }
 
-type twilioLocationReq struct {
+type twilioLocationRequest struct {
     Latitude  float64 `form:"Latitude"`   
     Longitude float64 `form:"Longitude"`
     Address   string `form:"Address"`
@@ -47,12 +47,9 @@ type twilioLocationReq struct {
 	ProfileName	string `form:"ProfileName"`
 }
 
-func (server *Server) TwilioReceiveMsg(ctx *gin.Context) {
+func (server *Server) twilioReceiveMsg(ctx *gin.Context) {
 
-	// 1 - user sends the location. We need to send him the, send full name reply.
-	// 2 - user sends the full name. We send him, thanks! Process complete msg. 
-
-	var req twilioLocationReq
+	var req twilioLocationRequest
 
     if err := ctx.ShouldBind(&req); err != nil { 
         ctx.JSON(http.StatusBadRequest, errorResponse(err))
@@ -64,11 +61,14 @@ func (server *Server) TwilioReceiveMsg(ctx *gin.Context) {
 	Name := ""
 	Status := ""
 
-	if req.Latitude != 0.0 && req.Longitude != 0.0 {
-		Latitude = req.Latitude
-		Longitude = req.Longitude
-	}
+	// if req.Longitude == 0.0 && req.Latitude == 0.0 {
+	// 	err := errors.New("empty location data (0.0) found in twilio location message")
+	// 	ctx.JSON(http.StatusBadRequest, errorResponse(err))
+    //     return
+	// }
 
+	Latitude = req.Latitude
+	Longitude = req.Longitude
 	// Assuming he sends only the right value in the body. 
 	
 	if (req.Body != "") {
@@ -78,11 +78,11 @@ func (server *Server) TwilioReceiveMsg(ctx *gin.Context) {
 	}
 	fmt.Println("NAME: ", Name)
 
-	foundUser, err := server.store.GetUserByNumber(ctx, sql.NullString{String: strings.Split(req.From, ":")[1], Valid: true})
+	foundUser, err := server.store.GetMemberByNumber(ctx, sql.NullString{String: strings.Split(req.From, ":")[1], Valid: true})
 	
 	if err != nil {
 		if err == sql.ErrNoRows {
-			arg := db.CreateUserParams{
+			arg := db.CreateMemberParams{
 				FullName: sql.NullString{String: Name, Valid: true},
 				Latitude: Latitude,
 				Longitude: Longitude,
@@ -90,7 +90,7 @@ func (server *Server) TwilioReceiveMsg(ctx *gin.Context) {
 				Status: db.NullUserStatus{UserStatus: "ADD_LOCATION", Valid: true},
 			}
 			
-			_, err := server.store.CreateUser(ctx, arg)
+			_, err := server.store.CreateMember(ctx, arg)
 			
 			if err != nil {
 				ctx.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -103,7 +103,7 @@ func (server *Server) TwilioReceiveMsg(ctx *gin.Context) {
 		}
 	} else {
 		if Latitude != 0.0 {
-			_, err = server.store.UpdateUser(ctx, db.UpdateUserParams{
+			_, err = server.store.UpdateMember(ctx, db.UpdateMemberParams{
 				ID: foundUser.ID,
 				FullName: sql.NullString{String: Name, Valid: true},
 				Status: db.NullUserStatus{UserStatus: "ADD_LOCATION", Valid: true},
@@ -112,7 +112,7 @@ func (server *Server) TwilioReceiveMsg(ctx *gin.Context) {
 			})
 			Status = "ADD_LOCATION"
 		} else {
-			_, err = server.store.UpdateUserName(ctx, db.UpdateUserNameParams{
+			_, err = server.store.UpdateMemberName(ctx, db.UpdateMemberNameParams{
 				ID: foundUser.ID,
 				FullName: sql.NullString{String: Name, Valid: true},
 				Status: db.NullUserStatus{UserStatus: "ADD_NAME", Valid: true},
@@ -143,24 +143,24 @@ func (server *Server) TwilioReceiveMsg(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, response) // Twilio expects a 200 OK response
 }
 
-func (server *Server) GetUsers(ctx *gin.Context) {
-	users, err := server.store.ListUsers(ctx)
+func (server *Server) getMembers(ctx *gin.Context) {
+	users, err := server.store.ListMembers(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
 	// Convert DB users to the API response format that a frontend can work with.
-	var responseUsers []UserResponse
+	var responseUsers []MemberResponse
 	for _, user := range users {
-		responseUsers = append(responseUsers, newUserResponse(user))
+		responseUsers = append(responseUsers, newMemberResponse(user))
 	}
 
 	ctx.JSON(http.StatusOK, responseUsers)
 }
 
 
-type UserResponse struct {
+type MemberResponse struct {
 	ID          int64     `json:"id"`
 	FullName    *string   `json:"full_name,omitempty"`
 	PhoneNumber *string   `json:"phone_number,omitempty"`
@@ -172,17 +172,17 @@ type UserResponse struct {
 	Status      string    `json:"status,omitempty"`
 }
 
-func newUserResponse(user db.User) UserResponse {
-	return UserResponse{
-		ID:          user.ID,
-		FullName:    nullStringToPtr(user.FullName),
-		PhoneNumber: nullStringToPtr(user.PhoneNumber),
-		Latitude:    user.Latitude,
-		Longitude:   user.Longitude,
-		Address:     nullStringToPtr(user.Address),
-		IsFamily:    nullBoolToPtr(user.IsFamily),
-		CreatedAt:   user.CreatedAt,
-		Status:      string(user.Status.UserStatus), // Assuming NullUserStatus has a `.String` field
+func newMemberResponse(member db.Member) MemberResponse {
+	return MemberResponse{
+		ID:          member.ID,
+		FullName:    nullStringToPtr(member.FullName),
+		PhoneNumber: nullStringToPtr(member.PhoneNumber),
+		Latitude:    member.Latitude,
+		Longitude:   member.Longitude,
+		Address:     nullStringToPtr(member.Address),
+		IsFamily:    nullBoolToPtr(member.IsFamily),
+		CreatedAt:   member.CreatedAt,
+		Status:      string(member.Status.UserStatus), // Assuming NullUserStatus has a `.String` field
 	}
 }
 

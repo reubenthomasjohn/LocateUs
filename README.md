@@ -27,3 +27,8 @@ sudo groupadd docker
 sudo usermod -aG docker $USER
 su -s ${USER}
 ```
+
+### Important Links:
+
+1. https://www.youtube.com/watch?v=MGkwghhytrI&ab_channel=RockinDev
+2. https://www.youtube.com/watch?v=oqOzM_WBqZc&t=1114s&ab_channel=CloudChamp

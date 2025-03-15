@@ -8,7 +8,6 @@ postgres:
 		-v pgdata:/var/lib/postgresql/data \
 		-d postgres:17.2-alpine
 
-
 postgres-down:
 	docker stop heatmap_db && docker container rm heatmap_db
 

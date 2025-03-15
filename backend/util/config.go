@@ -1,6 +1,10 @@
 package util
 
-import "github.com/spf13/viper"
+import (
+	"time"
+
+	"github.com/spf13/viper"
+)
 
 type Config struct {
 	AccountSid string `mapstructure:"TWILIO_ACCOUNT_SID"`
@@ -12,6 +16,8 @@ type Config struct {
 	NgrokUrl string `mapstructure:"NGROK_URL"`
 	DomainName string `mapstructure:"DOMAIN_NAME"`
 	PrefixUrl	string
+	TokenSymmetricKey string `mapstructure:"TOKEN_SYMMETRIC_KEY"`
+	AccessTokenDuration time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

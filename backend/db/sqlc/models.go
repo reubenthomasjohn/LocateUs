@@ -53,7 +53,7 @@ func (ns NullUserStatus) Value() (driver.Value, error) {
 	return string(ns.UserStatus), nil
 }
 
-type User struct {
+type Member struct {
 	ID          int64          `json:"id"`
 	FullName    sql.NullString `json:"full_name"`
 	PhoneNumber sql.NullString `json:"phone_number"`
@@ -63,4 +63,13 @@ type User struct {
 	IsFamily    sql.NullBool   `json:"is_family"`
 	CreatedAt   time.Time      `json:"created_at"`
 	Status      NullUserStatus `json:"status"`
+}
+
+type User struct {
+	Username          string    `json:"username"`
+	HashedPassword    string    `json:"hashed_password"`
+	FullName          string    `json:"full_name"`
+	Email             string    `json:"email"`
+	PasswordChangedAt time.Time `json:"password_changed_at"`
+	CreatedAt         time.Time `json:"created_at"`
 }

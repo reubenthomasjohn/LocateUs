@@ -1,34 +1,61 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	db "github.com/reubenthomasjohn/location-heatmap/db/sqlc"
+	"github.com/reubenthomasjohn/location-heatmap/token"
+	"github.com/reubenthomasjohn/location-heatmap/util"
 )
 
 type Server struct {
 	router *gin.Engine
 	store *db.Store
+	tokenMaker token.Maker
+	config util.Config
 }
 
-func NewServer(store *db.Store) *Server {
-	server := &Server{store: store}
+func NewServer(config util.Config, store *db.Store) (*Server, error) {
+
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+	if err != nil {
+		return nil, fmt.Errorf("cannot create token maker: %w", err)
+	}
+
+	server := &Server{
+		config: config,
+		store: store,
+		tokenMaker: tokenMaker,
+	}
+
+	server.setupRouter()
+	return server, nil
+}
+
+func (server *Server) setupRouter() {
 	router := gin.Default()
 
-	config := cors.DefaultConfig()
-	// config.AllowOrigins = []string{"http://google.com"}
-	// config.AllowOrigins = []string{"http://google.com", "http://facebook.com"}
-	config.AllowAllOrigins = true
+	corsConfig := cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173", "https://www.locatetogether.net/"}, 
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		AllowCredentials: true,
+	}
 
-  	router.Use(cors.New(config))
+  	router.Use(cors.New(corsConfig))
 
-	router.POST("/twilio-status", server.TwilioStatusMsg)
-	router.POST("/twilio-receive-msg", server.TwilioReceiveMsg)
+	router.POST("/users", server.createUser)
+	router.POST("/users/login", server.loginUser)
+	router.POST("/twilio-status", server.twilioStatusMsg)
+	router.POST("/twilio-receive-msg", server.twilioReceiveMsg)
 
-	router.GET("/users", server.GetUsers)
+	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
+
+	authRoutes.GET("/members", server.getMembers)
 
 	server.router = router
-	return server
 }
 
 func (server *Server) Start(address string) error {

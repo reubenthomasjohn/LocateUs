@@ -22,6 +22,15 @@ export const Header = () => {
             <a href="#" className="text-gray-500 hover:text-gray-900">
               Help
             </a>
+            <a
+              onClick={() => {
+                localStorage.removeItem("access_token");
+              }}
+              href="/"
+              className="text-gray-500 hover:text-gray-900"
+            >
+              Logout
+            </a>
           </nav>
         </div>
       </div>

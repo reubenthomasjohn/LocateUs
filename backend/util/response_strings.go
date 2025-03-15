@@ -9,6 +9,6 @@ type MessageResponses struct {
 var MessageResponsesInstance = MessageResponses{
 	LocationReceived: "Thank you for sharing your location. \n\nNow, please send your full name. \n(ex: John Doe)",
 	SendLocationPrompt: "Please share your location (not live location)",
-	ProcessComplete: "We have received all your details. You can view the dashboard at https://www.ccc-dashboard.com",
+	ProcessComplete: "We have received all your details. Thank you!",
 }
 

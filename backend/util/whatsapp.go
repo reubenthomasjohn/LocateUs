@@ -25,7 +25,7 @@ func TwilioSendMsg(toNumber, msgBody string) (response string, err error) {
 	params.SetTo(toNumber)
 	params.SetFrom(fmt.Sprintf("whatsapp:%s", config.SenderNumber))
 	params.SetBody(msgBody)
-	params.SetMediaUrl([]string{"https://media.christcommunitychurch.in/sites/2/2017/06/2017-logo-2.png"})
+	// params.SetMediaUrl([]string{"https://media.christcommunitychurch.in/sites/2/2017/06/2017-logo-2.png"})
 	// params.SetStatusCallback(fmt.Sprintf("%s/%s", config.PrefixUrl, callbackEndpoint))
 
 
