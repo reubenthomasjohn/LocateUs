@@ -26,7 +26,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const api = "http://0.0.0.0:80/members"; // Replace with your actual API
+        const api = "https://locatetogether.net/members"; // Replace with your actual API
         const token = localStorage.getItem("access_token");
 
         if (!token) {

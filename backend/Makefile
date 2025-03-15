@@ -14,11 +14,17 @@ postgres-down:
 createdb:
 	docker exec -it heatmap_db createdb --username=postgres --owner=postgres ccc
 
-migrateup:
+migrateuplocal:
 	migrate -path db/migration -database "postgres://postgres:secret@localhost:5432/ccc?sslmode=disable" -verbose up
 
-migratedown:
+migratedownlocal:
 	migrate -path db/migration -database "postgres://postgres:secret@localhost:5432/ccc?sslmode=disable" -verbose down
+
+migratedownsupabase:
+	migrate -path db/migration -database "postgresql://postgres:password%40123321@db.rjiqwntbymelcgvmrsfn.supabase.co:5432/postgres" -verbose down
+
+migrateupsupabase:
+	migrate -path db/migration -database "postgresql://postgres:password%40123321@db.rjiqwntbymelcgvmrsfn.supabase.co:5432/postgres" -verbose up
 
 sqlc:
 	sqlc generate
