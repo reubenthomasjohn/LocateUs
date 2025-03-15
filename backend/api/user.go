@@ -87,23 +87,27 @@ type loginUserResponse struct {
 
 func (server *Server) loginUser(ctx *gin.Context) {
 	var req loginUserRequest
-	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse((err)))
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		log.Printf("Error binding request body: %v", err)
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
 	user, err := server.store.GetUser(ctx, req.Username)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			log.Printf("User not found: %s", req.Username)
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
+		log.Printf("Error fetching user from DB: %v", err)
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
 	err = util.CheckPassword(req.Password, user.HashedPassword)
 	if err != nil {
+		log.Printf("Invalid password for user: %s", req.Username)
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
@@ -112,13 +116,16 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		user.Username, server.config.AccessTokenDuration,
 	)
 	if err != nil {
+		log.Printf("Error generating access token for user: %s, error: %v", user.Username, err)
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
+	log.Printf("User %s logged in successfully", user.Username)
+
 	rsp := loginUserResponse{
 		AccessToken: accessToken,
-		User: newUserResponse(user),
+		User:        newUserResponse(user),
 	}
 	ctx.JSON(http.StatusOK, rsp)
 }
