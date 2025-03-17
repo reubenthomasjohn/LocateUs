@@ -24,7 +24,7 @@ export function UserTablePagination({
   users,
   onEdit,
   onDelete,
-  pageSize = 2,
+  pageSize = 10,
 }: UserTablePaginationProps) {
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
