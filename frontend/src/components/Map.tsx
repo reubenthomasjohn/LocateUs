@@ -41,7 +41,15 @@ export function Map({ users }: MapProps) {
       // Create info window
       infoWindowRef.current = new google.maps.InfoWindow();
 
-      console.log("Users: ", users);
+      const hbf_locations = [{ lat: 18.602730336249, lng: 73.763451610933 }];
+
+      hbf_locations.forEach((location, index) => {
+        new google.maps.Marker({
+          position: location,
+          map,
+          title: `HBF${index + 1}`,
+        });
+      });
 
       // Create markers for each location
       users.forEach((user) => {
@@ -80,6 +88,8 @@ export function Map({ users }: MapProps) {
           });
         }
       });
+
+      // Add HBF pins
 
       // Create heatmap layer
       const heatmapData = users.map(
