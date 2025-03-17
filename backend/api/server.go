@@ -38,7 +38,7 @@ func (server *Server) setupRouter() {
 	router := gin.Default()
 
 	corsConfig := cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173", "https://www.locatetogether.net/"}, 
+		AllowOrigins:     []string{"http://localhost:5173", "https://www.locatetogether.net"}, 
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		AllowCredentials: true,

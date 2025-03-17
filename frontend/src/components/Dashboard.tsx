@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Map } from "./Map";
-import { UserTable } from "./UserTable";
+// import { UserTable } from "./UserTable";
+import { UserTablePagination } from "./UserTablePagination";
 import { Search } from "lucide-react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
@@ -72,8 +73,8 @@ function Dashboard() {
   const filteredUsers = (users ?? []).filter((user) => {
     const searchLower = searchQuery.toLowerCase();
     return (
-      user.full_name.toLowerCase().includes(searchLower) ||
-      user.phone_number.includes(searchQuery)
+      user.full_name?.toLowerCase().includes(searchLower) ||
+      user.phone_number?.includes(searchQuery)
     );
   });
 
@@ -124,7 +125,7 @@ function Dashboard() {
                   </div>
                 </div>
               </div>
-              <UserTable
+              <UserTablePagination
                 users={filteredUsers}
                 onEdit={handleEditUser}
                 onDelete={handleDeleteUser}
